@@ -334,7 +334,7 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
             </div>
 
             {/* Chat Input */}
-            <ChatWidget />
+            <ChatWidget publicationId={publication?.id}/>
           </aside>
         </div>
 

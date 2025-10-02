@@ -1,11 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const ChatWidget = () => {
+const ChatWidget = ({publicationId}) => {
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Hi! How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
-  const [open, setOpen] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState(null);
+  const [open, setOpen] = useState(false)
+
+  // 🔹 API call whenever user sends a message
+  useEffect(() => {
+    if (!pendingMessage) return;
+
+    const fetchBotReply = async () => {
+      try {
+        const response = await axios.post("https://www.syfuddhin.com/api/qa/single-doc",
+          {
+            publication_id: publicationId,
+            question: pendingMessage,
+            k: 6,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            }})
+
+        const data = await response.data
+
+        console.log("data: ", data);
+        // Assuming API returns something like { answer: "..." }
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: data?.answer || "Sorry, I didn’t get that." },
+        ]);
+      } catch (error) {
+        console.error("API error:", error);
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: "Something went wrong. Please try again." },
+        ]);
+      } finally {
+        setPendingMessage(null);
+      }
+    };
+
+    fetchBotReply();
+  }, [pendingMessage]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -14,13 +55,8 @@ const ChatWidget = () => {
     const newMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, newMessage]);
 
-    // Fake bot reply
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "Got it! I'll get back to you on that." },
-      ]);
-    }, 800);
+    // Trigger API request
+    setPendingMessage(input);
 
     setInput("");
   };
