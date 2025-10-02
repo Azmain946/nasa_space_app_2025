@@ -68,7 +68,7 @@ const ChatWidget = ({publicationId}) => {
           {/* Header */}
           <div className="p-3 bg-blue-800 rounded-t-2xl flex justify-between items-center">
             <span className="text-white text-sm font-semibold">
-              Customer Support
+              Ask Anything
             </span>
             <button onClick={() => setOpen(false)} className="text-white/70">
               ✕
