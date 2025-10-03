@@ -4,7 +4,7 @@ import KnowledgeGraph from "./KnowledgeGraph";
 import ChatWidget from "./ChatWidget";
 import { Link } from "react-router-dom";
 import { getDriveFileId } from "../helper";
-
+import PublicationSkeleton from "./PublicationLoader";
 interface Author {
   name: string;
 }
@@ -34,7 +34,7 @@ interface ScientificProgress {
 interface Consensus {
   areas_of_debate: string[];
   community_perspectives: string[];
-  scientific_consensus:string[];
+  scientific_consensus: string[];
 }
 
 interface Publication {
@@ -55,7 +55,6 @@ interface Publication {
   knowledgeable_insights?: ScientificProgress;
   consensus_disagreement?: Consensus;
   faqs?: FAQ[];
-  
 }
 
 interface PublicationDetailProps {
@@ -63,8 +62,12 @@ interface PublicationDetailProps {
 }
 
 const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
-  const [summaryType, setSummaryType] = useState<"scientist" | "investor" | "architect">("scientist");
-  const [showPopup, setShowPopup] = useState<"progress" | "gaps" | "consensus"  | null>(null);
+  const [summaryType, setSummaryType] = useState<
+    "scientist" | "investor" | "architect"
+  >("scientist");
+  const [showPopup, setShowPopup] = useState<
+    "progress" | "gaps" | "consensus" | null
+  >(null);
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [publication, setPublication] = useState<Publication | null>(null);
   const [related, setRelated] = useState(null);
@@ -86,8 +89,8 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
         "Key Breakthroughs: ",
         ...(publication?.knowledgeable_insights?.key_breakthroughs ?? []),
         "Recent Advances: ",
-        ...(publication?.knowledgeable_insights?.recent_advances ?? [])
-      ].join("\n")
+        ...(publication?.knowledgeable_insights?.recent_advances ?? []),
+      ].join("\n"),
     },
     gaps: {
       title: "Knowledge Gaps",
@@ -97,27 +100,28 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
         "Research Needs: ",
         ...(publication?.knowledge_gaps?.research_needs ?? []),
         "Future Directions: ",
-        ...(publication?.knowledge_gaps?.future_directions ?? [])
-      ].join("\n")
-     },
+        ...(publication?.knowledge_gaps?.future_directions ?? []),
+      ].join("\n"),
+    },
     consensus: {
       title: "Consensus/Disagreement",
-      content:[
+      content: [
         "Areas of Debate: ",
         ...(publication?.consensus_disagreement?.areas_of_debate ?? []),
         "Community Perspectives: ",
         ...(publication?.consensus_disagreement?.community_perspectives ?? []),
         "Scientific Consensus: ",
-        ...(publication?.consensus_disagreement?.scientific_consensus ?? [])
-      ].join("\n")
-    
+        ...(publication?.consensus_disagreement?.scientific_consensus ?? []),
+      ].join("\n"),
     },
   };
 
   useEffect(() => {
     const fetchPublications = async () => {
       try {
-        const response = await fetch(`https://www.syfuddhin.com/api/publications/${id}`);
+        const response = await fetch(
+          `https://www.syfuddhin.com/api/publications/${id}`
+        );
         if (!response.ok) throw new Error("Fetching failed!");
         const result: Publication = await response.json();
         console.log(result);
@@ -132,11 +136,13 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
   useEffect(() => {
     const fetchRelatedData = async () => {
       try {
-        const response = await fetch(`https://www.syfuddhin.com/api/publications/${id}/related`);
+        const response = await fetch(
+          `https://www.syfuddhin.com/api/publications/${id}/related`
+        );
         if (!response.ok) throw new Error("Fetching failed!");
         const result = await response.json();
-        
-        setRelated(result)
+
+        setRelated(result);
       } catch (error) {
         console.error(error);
       }
@@ -144,12 +150,15 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
     fetchRelatedData();
   }, [id]);
 
-  let audio_file_id
+  let audio_file_id;
   if (publication) {
-    audio_file_id = getDriveFileId(publication?.podcast_audio_path)
+    audio_file_id = getDriveFileId(publication?.podcast_audio_path);
   }
   // console.log(publication);
 
+  if (!publication) {
+    return <PublicationSkeleton />;
+  }
   return (
     <div className="publication-page">
       <div className="publication-container">
@@ -159,7 +168,9 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
           <div className="publication-meta">
             <span className="text-sm">
               <span className="inline-block w-1.5 h-1.5 bg-white/10 rounded-full mr-2"></span>
-              {publication?.authors?.map((author) => `${author.name}`).join(", ")}
+              {publication?.authors
+                ?.map((author) => `${author.name}`)
+                .join(", ")}
             </span>
             <span> • </span>
             <span className="text-sm">
@@ -180,7 +191,6 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
         <div className="text-center mb-6">
           <div className="flex justify-center items-center mb-4 gap-5">
             <h3 className="font-bold text-white"># Keywords</h3>
-            
           </div>
           <div className="flex flex-wrap justify-center gap-3">
             {publication?.tags?.map((tag) => (
@@ -199,26 +209,29 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
               <div className="flex justify-between items-center mb-3">
                 <div className="font-bold">Summary</div>
                 <div className="flex gap-2">
-                  {(["scientist", "investor", "architect"] as const).map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setSummaryType(type)}
-                      className={`px-3 py-1 text-xs rounded transition-all ${
-                        summaryType === type
-                          ? "bg-[#4ac7ff] text-[#0b1444] font-semibold"
-                          : "bg-[#1e2a6e] border border-[#4ac7ff] text-[#d6efff] hover:bg-[#263891]"
-                      }`}
-                    >
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </button>
-                  ))}
+                  {(["scientist", "investor", "architect"] as const).map(
+                    (type) => (
+                      <button
+                        key={type}
+                        onClick={() => setSummaryType(type)}
+                        className={`px-3 py-1 text-xs rounded transition-all ${
+                          summaryType === type
+                            ? "bg-[#4ac7ff] text-[#0b1444] font-semibold"
+                            : "bg-[#1e2a6e] border border-[#4ac7ff] text-[#d6efff] hover:bg-[#263891]"
+                        }`}
+                      >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
 
               <div
                 className="mb-4 p-4 rounded-lg border-l-4 border-[#2fb2ff]"
                 style={{
-                  background: "linear-gradient(90deg, rgba(11,20,68,0.18), rgba(11,20,68,0.08))",
+                  background:
+                    "linear-gradient(90deg, rgba(11,20,68,0.18), rgba(11,20,68,0.08))",
                 }}
               >
                 <strong>Abstract</strong>
@@ -240,13 +253,15 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
             />} */}
 
             <div className="publication-card">
-            <div className="font-bold mb-2">Podcast!</div>
-            {publication && <iframe
-            src={`https://drive.google.com/file/d/${audio_file_id}/preview`}
-            width="100%"
-            height="60"
-            allow="autoplay"
-              ></iframe>}
+              <div className="font-bold mb-2">Podcast!</div>
+              {publication?.podcast_audio_path && (
+                <iframe
+                  src={`https://drive.google.com/file/d/${audio_file_id}/preview`}
+                  width="100%"
+                  height="60"
+                  allow="autoplay"
+                ></iframe>
+              )}
             </div>
 
             {/* Knowledge Graph Placeholder */}
@@ -274,7 +289,6 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
                   {type === "progress" && "Scientific Progress"}
                   {type === "gaps" && "Knowledge Gaps"}
                   {type === "consensus" && "Consensus/Disagreement"}
-                  
                 </button>
               ))}
             </div>
@@ -311,30 +325,40 @@ const PublicationDetail: React.FC<PublicationDetailProps> = ({ id }) => {
             <div className="publication-card">
               <div className="text-[#60a8ff] font-bold mb-2">Quick Links</div>
               <div className="space-y-2">
-                {["Download PDF", "Cite this paper", "Related datasets", "View code"].map(
-                  (link, index) => (
-                    <a
-                      key={index}
-                      href={`${publication?.original_link}`}
-                      className="block text-sm text-[#2fb2ff] hover:underline"
-                    >
-                      {link}
-                    </a>
-                  )
-                )}
+                {[
+                  "Download PDF",
+                  "Cite this paper",
+                  "Related datasets",
+                  "View code",
+                ].map((link, index) => (
+                  <a
+                    key={index}
+                    href={`${publication?.original_link}`}
+                    className="block text-sm text-[#2fb2ff] hover:underline"
+                  >
+                    {link}
+                  </a>
+                ))}
               </div>
             </div>
 
             <div className="publication-card">
-            <div className="text-[#60a8ff] font-bold mb-2">Related Publications</div>
-            { related && related.map((post)=>(
-              <div className="flex justify-between items-center text-white/70 font-semibold"><a href={`${post?.original_link}`}>{post?.title}</a></div>
-            ))}
-            
+              <div className="text-[#60a8ff] font-bold mb-2">
+                Related Publications
+              </div>
+              <div className="space-y-2">
+              {related &&
+                related.map((post) => (
+                  <div className="flex flex-col justify-between items-start gap-2 text-white/70 font-semibold p-1 border-b border-white/5 group cursor-pointer">
+                    <Link className="text-xs group-hover:text-blue-500" to={`${post?.original_link}`}>{post?.title}</Link>
+                    <span className="text-xs text-gray-400 group-hover:text-blue-600"> {post?.category?.title}, {post?.date_year}</span>
+                  </div>
+                ))}
+            </div>
             </div>
 
             {/* Chat Input */}
-            <ChatWidget publicationId={publication?.id}/>
+            <ChatWidget publicationId={publication?.id} />
           </aside>
         </div>
 

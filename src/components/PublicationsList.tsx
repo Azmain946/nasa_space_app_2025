@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import SearchingPublications from "./Loading";
 
 interface Publication {
   id: number;
@@ -8,6 +9,7 @@ interface Publication {
   date_month?: string;
   category?: { id: number; title: string };
   subcategory?: { id: number; title: string };
+  summary_of_abstract: string;
 }
 
 const PublicationsList = () => {
@@ -16,12 +18,20 @@ const PublicationsList = () => {
 
   const [publications, setPublications] = useState<Publication[]>([]);
   const [sortBy, setSortBy] = useState("new");
+  const [loading, setLoading] = useState(false);
 
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const searchParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
   const categoryFilter = searchParams.get("category");
   const subCategoryFilter = searchParams.get("subCategory");
-  const fromYear = searchParams.get("from") ? parseInt(searchParams.get("from")!) : null;
-  const toYear = searchParams.get("to") ? parseInt(searchParams.get("to")!) : null;
+  const fromYear = searchParams.get("from")
+    ? parseInt(searchParams.get("from")!)
+    : null;
+  const toYear = searchParams.get("to")
+    ? parseInt(searchParams.get("to")!)
+    : null;
 
   const sortedPublications = [...publications].sort((a, b) => {
     const dateA = new Date(`${a.date_year || "2000"}`);
@@ -57,6 +67,7 @@ const PublicationsList = () => {
   useEffect(() => {
     const fetchPublications = async () => {
       try {
+        setLoading(true);
         const response = await fetch(
           "https://www.syfuddhin.com/api/publications?skip=0&limit=50"
         );
@@ -65,6 +76,8 @@ const PublicationsList = () => {
         setPublications(result?.publications || []);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPublications();
@@ -94,7 +107,9 @@ const PublicationsList = () => {
       </header>
 
       <div className="publications">
-        {filteredPublications.length > 0 ? (
+        {loading ? (
+          <SearchingPublications/>
+        ) : filteredPublications.length > 0 ? (
           filteredPublications.map((publication) => (
             <div
               key={publication.id}
@@ -102,6 +117,9 @@ const PublicationsList = () => {
               onClick={() => handlePublicationClick(publication.id)}
             >
               <h2 className="publication-item-title">{publication.title}</h2>
+              <p className="publication-item-description line-clamp-3 text-sm text-slate-200 my-2">
+                {publication.summary_of_abstract}
+              </p>
               <span className="publication-item-date">
                 {publication.date_month} {publication.date_year}
               </span>
@@ -120,7 +138,9 @@ const PublicationsList = () => {
             </div>
           ))
         ) : (
-          <p className="text-white/60 mt-6">No publications found with current filters.</p>
+          <p className="text-white/60 mt-6">
+            No publications found with current filters.
+          </p>
         )}
       </div>
     </div>

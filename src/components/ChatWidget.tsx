@@ -64,7 +64,7 @@ const ChatWidget = ({publicationId}) => {
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {open ? (
-        <div className="w-80 h-96 bg-blue-950 border border-white/10 rounded-2xl flex flex-col shadow-lg">
+        <div className="w-96 h-[60vh] bg-blue-950 border border-white/10 rounded-2xl flex flex-col shadow-lg">
           {/* Header */}
           <div className="p-3 bg-blue-800 rounded-t-2xl flex justify-between items-center">
             <span className="text-white text-sm font-semibold">
@@ -95,6 +95,11 @@ const ChatWidget = ({publicationId}) => {
                 </div>
               </div>
             ))}
+            {pendingMessage && (
+              <div className="flex justify-start">
+               <p>Thinking...</p>
+              </div>
+            )}
           </div>
 
           {/* Input */}
