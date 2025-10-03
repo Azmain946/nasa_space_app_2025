@@ -1,12 +1,12 @@
 import { Search, Leaf } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
-
+  const navigate = useNavigate();
   const handleSearch = () => {
-    console.log("Searching for:", searchQuery);
-    // Add search functionality here
+    navigate(`/publications?q=${searchQuery}`);
   };
 
   return (
@@ -18,7 +18,7 @@ const Header = () => {
       <p className="text-light-blue mb-6">
         Exploring space biology data for the NASA Space App Challenge
       </p>
-      
+
       <div className="flex justify-center mb-6">
         <div className="flex">
           <input
@@ -27,7 +27,7 @@ const Header = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="space-input w-80"
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
           />
           <button onClick={handleSearch} className="space-search-button">
             <Search className="w-4 h-4 inline mr-2" />
